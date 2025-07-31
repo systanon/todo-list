@@ -100,7 +100,7 @@ All todos are stored in a local file todo.txt.
 Each line represents one todo item with the following format:
 <pre>
 ```text
-<id>|<title>|<priority>|<status>|<deadline>
+&lt;id&gt;|&lt;title&gt;|&lt;priority&gt;|&lt;status&gt;|&lt;deadline&gt;
 ```
 </pre>
 
