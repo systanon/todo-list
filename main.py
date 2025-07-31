@@ -18,51 +18,57 @@ if not os.path.exists(FILE_PATH):
 def parseBool(s):
     return s.strip().lower() == "true"
 
+
+def generateId():
+    timestamp = int(time.time() * 1000)
+    rand_part = random.randint(100, 999)
+    return f"{str(timestamp)[-5:]}{rand_part}"    
+
 def save(todos, statuses):
+    print("statuses",statuses)
+    print("todos",todos)
     try:
         with open(FILE_PATH, "w", encoding="utf-8") as file:
-            for (id, title, priority), status in zip(todos, statuses):
-                file.write(f"{id}|{title}|{priority}|{status}\n")
+            for id, title, priority in todos:
+                file.write(f"{id}|{title}|{priority}|{statuses[id]}\n")
     except:
-        print("Failed to save file.")
+        print(f"Failed to save file")
     else:
         print("File is saved")
 
 def load():
     todos = []
-    statuses = []
+    statuses = {}
     try:
         with open(FILE_PATH, "r", encoding="utf-8") as file:
             for line in file:
                 id, title, priority, status = line.strip().split("|")
-                todos.append(((int(id)), title, priority))
-                statuses.append(parseBool(status))
+                todos.append((id, title, priority))
+                statuses[id] = parseBool(status)
+            print(statuses)    
         return todos, statuses
     except  Exception as e:
         print(f"Failed to load file: {e}")
-        return [], []
+        return [], {}
     
 
 def addTodo(todos, statuses):
     title = input("Input title: ")
     priority = input("Input priority: ")
-    id = 0
-
-    if len(todos) > 0:
-        id = len(todos)
+    id = generateId()
 
     todos.append((id, title, priority))
-    statuses.append(False)
+    statuses[id] = False
     save(todos, statuses)
     
 
 
 def removeTodo(todos, statuses):
-    indexToRemove = int(input("Input index to remove: "))
+    id = input("Input todo id: ")
     try:
-        del todos[indexToRemove]
-        del statuses[indexToRemove]
-        save(todos, statuses)
+        filteredTodos = [todo for todo in todos if todo[0] != id]
+        del statuses[id]
+        save(filteredTodos, statuses)
     except IndexError as e:
         print(f"Failed to remove todo: {e}")         
 
@@ -75,14 +81,14 @@ def getStatus(status):
 def showTodos(todos, statuses):
     if len(todos) > 0:
         for index ,(id, title, priority) in enumerate(todos):
-            print(f"id: {id}, title: {title}, priority: {priority}, status: {getStatus(statuses[index])}")
+            print(f"id: {id}, title: {title}, priority: {priority}, status: {getStatus(statuses[id])}")
     else:
         print("Empty todos")
 
 def changeStatus(todos, statuses, done):
-    indexToChangeStatus = int(input("Input index of todos which need to change status: "))
+    id = input("Input todo id: ")
     try:
-        statuses[indexToChangeStatus]  = done
+        statuses[id] = done
         save(todos, statuses)
     except IndexError as e:
         print(f"Failed to change status: {e}")      
