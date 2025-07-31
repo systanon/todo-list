@@ -1,6 +1,7 @@
 import os
 import random
 import time
+from datetime import datetime, date
 
 
 FILE = "todo.txt"
@@ -27,14 +28,12 @@ def generateId():
 
 
 def save(todos, statuses):
-    print("statuses", statuses)
-    print("todos", todos)
     try:
         with open(FILE_PATH, "w", encoding="utf-8") as file:
-            for id, title, priority in todos:
-                file.write(f"{id}|{title}|{priority}|{statuses[id]}\n")
-    except:
-        print(f"Failed to save file")
+            for id, title, priority, deadline in todos:
+                file.write(f"{id}|{title}|{priority}|{statuses[id]}|{deadline}\n")
+    except Exception as e:
+        print(f"Failed to save file {e}")
     else:
         print("File is saved")
 
@@ -45,8 +44,8 @@ def load():
     try:
         with open(FILE_PATH, "r", encoding="utf-8") as file:
             for line in file:
-                id, title, priority, status = line.strip().split("|")
-                todos.append((id, title, priority))
+                id, title, priority, status, deadline = line.strip().split("|")
+                todos.append((id, title, priority, deadline))
                 statuses[id] = parseBool(status)
         return todos, statuses
     except Exception as e:
@@ -54,9 +53,7 @@ def load():
         return [], {}
 
 
-def addTodo(todos, statuses):
-    title = input("Input todo title: ").strip()
-
+def addPryority():
     print("\nSelect priority:")
     print("  1 - 🔴 High")
     print("  2 - 🟡 Medium")
@@ -66,14 +63,43 @@ def addTodo(todos, statuses):
     choice = input("Input priority(1-3): ").strip()
 
     priority = priorities.get(choice)
-    if priority:
-        id = generateId()
 
-        todos.append((id, title, priority))
-        statuses[id] = False
-        save(todos, statuses)
+    if priority:
+        return priority
     else:
         print("Incorrect choice of priority")
+        return None
+
+
+def inputDeadline():
+    date_str = input("Enter deadline (in YYYY-MM-DD format): ")
+    try:
+        deadline = datetime.strptime(date_str, "%Y-%m-%d").date()
+        print("deadline", deadline)
+        return deadline
+    except ValueError:
+        print("Invalid date format. Example: 2025-08-01")
+        return None
+
+
+def addTodo(todos, statuses):
+    title = input("Input todo title: ").strip()
+
+    priority = addPryority()
+
+    if not priority:
+        return
+
+    deadline = inputDeadline()
+
+    if not deadline:
+        return
+
+    id = generateId()
+
+    todos.append((id, title, priority, deadline))
+    statuses[id] = False
+    save(todos, statuses)
 
 
 def removeTodo(todos, statuses):
@@ -94,15 +120,39 @@ def getStatus(status):
 
 
 def showTodos(todos, statuses):
+    for _, (id, title, priority, deadline) in enumerate(todos):
+        print(
+            f"id: {id}, title: {title}, priority: {priority}, deadline: {deadline}, status: {getStatus(statuses[id])}"
+        )
+
+
+def filteredByPriority(todos, statuses):
+    if len(todos) == 0:
+        print("Empty todos")
+        return
+
     priorityOrder = {"high": 0, "low": 2, "medium": 1}
     todosSorted = sorted(todos, key=lambda todo: priorityOrder.get(todo[2], 99))
-    if len(todosSorted) > 0:
-        for _, (id, title, priority) in enumerate(todosSorted):
-            print(
-                f"id: {id}, title: {title}, priority: {priority}, status: {getStatus(statuses[id])}"
-            )
-    else:
+    showTodos(todosSorted, statuses)
+
+
+def getUpcomingTodos(todos, statuses):
+    if len(todos) == 0:
         print("Empty todos")
+        return
+
+    today = date.today()
+
+    def parse(todo):
+        id, title, priority, deadline_str = todo
+        deadline = datetime.strptime(deadline_str, "%Y-%m-%d").date()
+        return (id, title, priority, deadline)
+
+    todos_with_dates = [parse(todo) for todo in todos]
+
+    upcoming = [todo for todo in todos_with_dates if todo[3] >= today]
+    sortedTodos = sorted(upcoming, key=lambda todo: todo[3])
+    showTodos(sortedTodos, statuses)
 
 
 def changeStatus(todos, statuses, done):
@@ -116,14 +166,15 @@ def changeStatus(todos, statuses, done):
 
 def main():
     while True:
-        print("--------------------------------------")
+        print("\n--------------------------------------")
         print("Options: ")
-        print("1 - add todo: ")
-        print("2 - show todos: ")
-        print("3 - remove todo: ")
-        print("4 - change status to done: ")
-        print("5 - change status to not done: ")
-        print("--------------------------------------")
+        print("  1 - add todo")
+        print("  2 - show todos")
+        print("  3 - remove todo")
+        print("  4 - change status to done")
+        print("  5 - change status to not done")
+        print("  6 - sorted by upcoming deadline")
+        print("--------------------------------------\n")
 
         todos, statuses = load()
 
@@ -132,13 +183,15 @@ def main():
             case "1":
                 addTodo(todos, statuses)
             case "2":
-                showTodos(todos, statuses)
+                filteredByPriority(todos, statuses)
             case "3":
                 removeTodo(todos, statuses)
             case "4":
                 changeStatus(todos, statuses, True)
             case "5":
                 changeStatus(todos, statuses, False)
+            case "6":
+                getUpcomingTodos(todos, statuses)
             case "0":
                 break
             case _:
