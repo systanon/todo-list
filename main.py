@@ -119,24 +119,26 @@ def getStatus(status):
         return "[ ]"
 
 
-def showTodos(todos, statuses):
-    for _, (id, title, priority, deadline) in enumerate(todos):
-        print(
-            f"id: {id}, title: {title}, priority: {priority}, deadline: {deadline}, status: {getStatus(statuses[id])}"
-        )
+def showTodos(statuses):
+    def inner(todos):
+        for _, (id, title, priority, deadline) in enumerate(todos):
+            print(
+                f"id: {id}, title: {title}, priority: {priority}, deadline: {deadline}, status: {getStatus(statuses[id])}"
+            )
+
+    return inner
 
 
-def filteredByPriority(todos, statuses):
+def filteredByPriority(todos):
     if len(todos) == 0:
         print("Empty todos")
         return
 
     priorityOrder = {"high": 0, "low": 2, "medium": 1}
-    todosSorted = sorted(todos, key=lambda todo: priorityOrder.get(todo[2], 99))
-    showTodos(todosSorted, statuses)
+    return sorted(todos, key=lambda todo: priorityOrder.get(todo[2], 99))
 
 
-def getUpcomingTodos(todos, statuses):
+def getUpcomingTodos(todos):
     if len(todos) == 0:
         print("Empty todos")
         return
@@ -151,8 +153,7 @@ def getUpcomingTodos(todos, statuses):
     todos_with_dates = [parse(todo) for todo in todos]
 
     upcoming = [todo for todo in todos_with_dates if todo[3] >= today]
-    sortedTodos = sorted(upcoming, key=lambda todo: todo[3])
-    showTodos(sortedTodos, statuses)
+    return sorted(upcoming, key=lambda todo: todo[3])
 
 
 def changeStatus(todos, statuses, done):
@@ -174,16 +175,19 @@ def main():
         print("  4 - change status to done")
         print("  5 - change status to not done")
         print("  6 - sorted by upcoming deadline")
+        print("  0 - quit")
         print("--------------------------------------\n")
 
         todos, statuses = load()
+
+        show = showTodos(statuses)
 
         userInput = input("Input option: ")
         match userInput:
             case "1":
                 addTodo(todos, statuses)
             case "2":
-                filteredByPriority(todos, statuses)
+                show(filteredByPriority(todos))
             case "3":
                 removeTodo(todos, statuses)
             case "4":
@@ -191,7 +195,7 @@ def main():
             case "5":
                 changeStatus(todos, statuses, False)
             case "6":
-                getUpcomingTodos(todos, statuses)
+                show(getUpcomingTodos(todos))
             case "0":
                 break
             case _:
