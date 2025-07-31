@@ -98,15 +98,20 @@ Choose option 6 to view todos sorted by the nearest deadline.
 
 All todos are stored in a local file todo.txt.
 Each line represents one todo item with the following format:
-
+<pre>
+```text
 <id>|<title>|<priority>|<status>|<deadline>
-
+```
+</pre>
 
 Example:
 
+<pre>
+```text
 82765|Pay bills|high|False|2025-08-10
 10923|Write article|medium|True|2025-08-12
-
+```
+</pre>
 
 •	id – auto-generated unique string
 •	status – True if completed, False otherwise
