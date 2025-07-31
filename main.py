@@ -53,13 +53,29 @@ def load():
     
 
 def addTodo(todos, statuses):
-    title = input("Input title: ")
-    priority = input("Input priority: ")
-    id = generateId()
+    title = input("Input todo title: ").strip()
 
-    todos.append((id, title, priority))
-    statuses[id] = False
-    save(todos, statuses)
+    print("\nSelect priority:")
+    print("  1 - 🔴 High")
+    print("  2 - 🟡 Medium")
+    print("  3 - 🟢 Low")
+
+    priorities = {
+        "1": "high",
+        "2": "medium",
+        "3": "low"
+    }
+    choice = input("Input priority(1-3): ").strip()
+
+    priority = priorities.get(choice)
+    if priority:
+        id = generateId()
+
+        todos.append((id, title, priority))
+        statuses[id] = False
+        save(todos, statuses)
+    else:
+        print("Incorrect choice of priority")
     
 
 
