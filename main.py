@@ -121,7 +121,7 @@ def getStatus(status):
 
 def showTodos(statuses):
     def inner(todos):
-        for _, (id, title, priority, deadline) in enumerate(todos):
+        for id, title, priority, deadline in todos:
             print(
                 f"id: {id}, title: {title}, priority: {priority}, deadline: {deadline}, status: {getStatus(statuses[id])}"
             )
