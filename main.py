@@ -132,7 +132,7 @@ def showTodos(statuses):
 def filteredByPriority(todos):
     if len(todos) == 0:
         print("Empty todos")
-        return
+        return []
 
     priorityOrder = {"high": 0, "low": 2, "medium": 1}
     return sorted(todos, key=lambda todo: priorityOrder.get(todo[2], 99))
@@ -141,7 +141,7 @@ def filteredByPriority(todos):
 def getUpcomingTodos(todos):
     if len(todos) == 0:
         print("Empty todos")
-        return
+        return []
 
     today = date.today()
 
