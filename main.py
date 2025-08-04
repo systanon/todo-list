@@ -75,7 +75,6 @@ def inputDeadline():
     date_str = input("Enter deadline (in YYYY-MM-DD format): ")
     try:
         deadline = datetime.strptime(date_str, "%Y-%m-%d").date()
-        print("deadline", deadline)
         return deadline
     except ValueError:
         print("Invalid date format. Example: 2025-08-01")
@@ -158,26 +157,28 @@ def getUpcomingTodos(todos):
 
 def changeStatus(todos, statuses, done):
     id = input("Input todo id: ")
-    try:
+    if id in statuses:
         statuses[id] = done
         save(todos, statuses)
-    except IndexError as e:
-        print(f"Failed to change status: {e}")
+    else:    
+        print(f"The entered ID: {id} is invalid")
 
+def showOptions():
+    print("\n--------------------------------------")
+    print("Options: ")
+    print("  1 - add todo")
+    print("  2 - show todos")
+    print("  3 - remove todo")
+    print("  4 - change status to done")
+    print("  5 - change status to not done")
+    print("  6 - sorted by upcoming deadline")
+    print("  7 - help")
+    print("  0 - quit")
+    print("--------------------------------------\n")
 
 def main():
+    showOptions()
     while True:
-        print("\n--------------------------------------")
-        print("Options: ")
-        print("  1 - add todo")
-        print("  2 - show todos")
-        print("  3 - remove todo")
-        print("  4 - change status to done")
-        print("  5 - change status to not done")
-        print("  6 - sorted by upcoming deadline")
-        print("  0 - quit")
-        print("--------------------------------------\n")
-
         todos, statuses = load()
 
         show = showTodos(statuses)
@@ -196,6 +197,8 @@ def main():
                 changeStatus(todos, statuses, False)
             case "6":
                 show(getUpcomingTodos(todos))
+            case "7":
+                showOptions()
             case "0":
                 break
             case _:
